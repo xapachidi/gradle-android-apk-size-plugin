@@ -37,7 +37,7 @@ class ApkSizePlugin : Plugin<Project> {
         task.description = "Outputs APK / AAR size for ${variant.name} variant."
         task.group = "Reporting"
         task.apk = output.outputFile
-        task.outputFile = project.file(path + ".csv")
+        task.outputFile = project.file(path + ".txt")
         task.extension = extension
 
         variant.assemble.doLast {

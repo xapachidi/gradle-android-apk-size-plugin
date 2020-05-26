@@ -21,30 +21,25 @@ open class ApkSizeTask : DefaultTask() {
     val fileEnding = apk.extension.toUpperCase(Locale.US)
     logger.log(LogLevel.LIFECYCLE, "Total $fileEnding Size in ${apk.name} in bytes: $apkSize (${ApkSizeTools.convertBytesToMegaBytes(apkSize)} mb)")
 
-    if (extension.teamcity) {
-      logger.log(LogLevel.LIFECYCLE, "##teamcity[buildStatisticValue key='ApkSize_${apk.name}_B' value='$apkSize']")
-      logger.log(LogLevel.LIFECYCLE, "##teamcity[buildStatisticValue key='ApkSize_${apk.name}_MB' value='${ApkSizeTools.convertBytesToMegaBytes(apkSize)}']")
-    }
-
     outputFile.parentFile.mkdirs()
     outputFile.createNewFile()
     outputFile.outputStream().use { outputStream ->
       val appendableStream = PrintStream(outputStream)
-      appendableStream.println("bytes,kilobytes,megabytes")
 
       val bytes = apkSize.toString()
       val kiloBytes = ApkSizeTools.convertBytesToKiloBytes(apkSize)
       val megaBytes = ApkSizeTools.convertBytesToMegaBytes(apkSize)
 
-      appendableStream.println("$bytes,$kiloBytes,$megaBytes")
+      appendableStream.println("Apk size is $megaBytes")
     }
 
-    failBuildMaxMethods(apkSize, extension.maxApkSize)
+    failBuildMaxMethods(apkSize, extension.maxApkSize.toLong())
   }
 
-  private fun failBuildMaxMethods(apkSize: Long, maxApkSize: Int) {
+  private fun failBuildMaxMethods(apkSize: Long, maxApkSize: Long) {
     if (extension.maxApkSize in 1 until apkSize) {
-      throw GradleException("The current APK is $apkSize Kb, the current max is: $maxApkSize Kb.")
+      val megaBytes = ApkSizeTools.convertBytesToMegaBytes(apkSize)
+      throw GradleException("The current APK is $megaBytes Mb, the current max is: $maxApkSize Mb.")
     }
   }
 }
